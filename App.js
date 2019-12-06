@@ -1,62 +1,71 @@
-import { AppLoading } from 'expo';
-import { Asset } from 'expo-asset';
-import * as Font from 'expo-font';
-import React, { useState } from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, {Component} from 'react';
+import {Text, View, Dimensions, ScrollView, StyleSheet} from 'react-native';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
-import AppNavigator from './navigation/AppNavigator';
+const {width, height} = Dimensions.get('window');
+const SCREEN_WIDTH = width;
+const SCREEN_HEIGHT = height;
+const ASPECT_RATIO = width / height;
+const LATITUDE = 37.78825;
+const LONGITUDE = -122.4324;
+const LATITUDE_DELTA = 0.0922;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
-export default function App(props) {
-  const [isLoadingComplete, setLoadingComplete] = useState(false);
+export default class Analysis extends Component {
+  constructor(props) {
+    super(props);
 
-  if (!isLoadingComplete && !props.skipLoadingScreen) {
-    return (
-      <AppLoading
-        startAsync={loadResourcesAsync}
-        onError={handleLoadingError}
-        onFinish={() => handleFinishLoading(setLoadingComplete)}
-      />
-    );
-  } else {
-    return (
-      <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        <AppNavigator />
-      </View>
-    );
+    this.state = {
+      region: {
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA
+      },
+      error: null
+    };
   }
-}
+  
+  setRegion = () => ({
+    latitude: this.state.latitude,
+    longitude: this.state.longitude,
+    latitudeDelta: LATITUDE_DELTA,
+    longitudeDelta: LONGITUDE_DELTA
+  });
 
-async function loadResourcesAsync() {
-  await Promise.all([
-    Asset.loadAsync([
-      require('./assets/images/robot-dev.png'),
-      require('./assets/images/robot-prod.png'),
-    ]),
-    Font.loadAsync({
-      // This is the font that we are using for our tab bar
-      ...Ionicons.font,
-      // We include SpaceMono because we use it in HomeScreen.js. Feel free to
-      // remove this if you are not using it in your app
-      'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
-    }),
-  ]);
-}
+  render() {
+  return (
+    <View style={styles.container}>
+      <ScrollView style={StyleSheet.absoluteFill} contentContainerStyle={styles.scrollview}>
+        <MapView provider={PROVIDER_GOOGLE} style={styles.map} scrollEnabled={true} zoomEnabled={true} pitchEnabled={true} rotateEnabled={true} initialRegion={this.state.region}>
+          <Marker title="This is a title" description="This is a description" coordinate={this.state.region}/>
+          <Marker title="This is setRegion" description="This is setRegion" coordinate={this.setRegion()}/>
+          
+         {
+            !!this.state.region.latitude && !!this.state.region.longitude && <Marker coordinate={{
+                  "latitude" : this.state.region.latitude,
+                  "longitude" : this.state.region.longitude
+                }} title={"Your Location"}/>
+          }
 
-function handleLoadingError(error) {
-  // In this case, you might want to report the error to your error reporting
-  // service, for example Sentry
-  console.warn(error);
-}
+        </MapView>
 
-function handleFinishLoading(setLoadingComplete) {
-  setLoadingComplete(true);
+      </ScrollView>
+    </View>);
+  }
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    alignItems: 'center'
   },
+  scrollview: {
+    alignItems: 'center'
+  },
+  map: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT * 0.9
+  }
 });
