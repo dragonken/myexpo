@@ -1,62 +1,114 @@
-import { AppLoading } from 'expo';
-import { Asset } from 'expo-asset';
-import * as Font from 'expo-font';
-import React, { useState } from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+//This is an example code for NavigationDrawer//
+import React, { Component } from 'react';
+//import react in our code.
+import { View, Image, TouchableOpacity } from 'react-native';
+// import all basic components
+ 
+//For React Navigation 3+
+//import {
+//  createStackNavigator,
+//  createDrawerNavigator,
+//  createAppContainer,
+//} from 'react-navigation';
+ 
+//For React Navigation 4+
+import {createAppContainer} from 'react-navigation';
+import {createDrawerNavigator} from 'react-navigation-drawer';
+import {createStackNavigator} from 'react-navigation-stack';
+import Screen1 from './pages/Screen1';
+import Screen2 from './pages/Screen2';
+import Screen3 from './pages/Screen3';
 
-import AppNavigator from './navigation/AppNavigator';
+import TabBarIcon from './components/TabBarIcon';
 
-export default function App(props) {
-  const [isLoadingComplete, setLoadingComplete] = useState(false);
-
-  if (!isLoadingComplete && !props.skipLoadingScreen) {
+ 
+class NavigationDrawerStructure extends Component {
+  //Structure for the navigatin Drawer
+  toggleDrawer = () => {
+    //Props to open/close the drawer
+    this.props.navigationProps.toggleDrawer();
+  };
+  render() {
     return (
-      <AppLoading
-        startAsync={loadResourcesAsync}
-        onError={handleLoadingError}
-        onFinish={() => handleFinishLoading(setLoadingComplete)}
-      />
-    );
-  } else {
-    return (
-      <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        <AppNavigator />
+      <View style={{ flexDirection: 'row' }}>
+        <TouchableOpacity onPress={this.toggleDrawer.bind(this)}>
+          {/*Donute Button Image */}
+          
+          <TabBarIcon name='ios-menu'/>
+        </TouchableOpacity>
       </View>
     );
   }
 }
-
-async function loadResourcesAsync() {
-  await Promise.all([
-    Asset.loadAsync([
-      require('./assets/images/robot-dev.png'),
-      require('./assets/images/robot-prod.png'),
-    ]),
-    Font.loadAsync({
-      // This is the font that we are using for our tab bar
-      ...Ionicons.font,
-      // We include SpaceMono because we use it in HomeScreen.js. Feel free to
-      // remove this if you are not using it in your app
-      'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
+ 
+const FirstActivity_StackNavigator = createStackNavigator({
+  //All the screen from the Screen1 will be indexed here
+  First: {
+    screen: Screen1,
+    navigationOptions: ({ navigation }) => ({
+      title: 'Demo Screen 1',
+      headerLeft: <NavigationDrawerStructure navigationProps={navigation} />,
+      headerStyle: {
+        backgroundColor: '#FF9800',
+      },
+      headerTintColor: '#fff',
     }),
-  ]);
-}
-
-function handleLoadingError(error) {
-  // In this case, you might want to report the error to your error reporting
-  // service, for example Sentry
-  console.warn(error);
-}
-
-function handleFinishLoading(setLoadingComplete) {
-  setLoadingComplete(true);
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
   },
 });
+ 
+const Screen2_StackNavigator = createStackNavigator({
+  //All the screen from the Screen2 will be indexed here
+  Second: {
+    screen: Screen2,
+    navigationOptions: ({ navigation }) => ({
+      title: 'Demo Screen 2',
+      headerLeft: <NavigationDrawerStructure navigationProps={navigation} />,
+      headerStyle: {
+        backgroundColor: '#FF9800',
+      },
+      headerTintColor: '#fff',
+    }),
+  },
+});
+ 
+const Screen3_StackNavigator = createStackNavigator({
+  //All the screen from the Screen3 will be indexed here
+  Third: {
+    screen: Screen3,
+    navigationOptions: ({ navigation }) => ({
+      title: 'Demo Screen 3',
+      headerLeft: <NavigationDrawerStructure navigationProps={navigation} />,
+      headerStyle: {
+        backgroundColor: '#FF9800',
+      },
+      headerTintColor: '#fff',
+    }),
+  },
+});
+ 
+const DrawerNavigatorExample = createDrawerNavigator({
+  //Drawer Optons and indexing
+  Screen1: {
+    //Title
+    screen: FirstActivity_StackNavigator,
+    navigationOptions: {
+      drawerLabel: 'Demo Screen 1',
+    },
+  },
+  Screen2: {
+    //Title
+    screen: Screen2_StackNavigator,
+    navigationOptions: {
+      drawerLabel: 'Demo Screen 2',
+    },
+  },
+  Screen3: {
+    //Title
+    screen: Screen3_StackNavigator,
+    navigationOptions: {
+      drawerLabel: 'Demo Screen 3',
+    },
+  },
+});
+ 
+export default createAppContainer(DrawerNavigatorExample);
